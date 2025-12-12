@@ -7,7 +7,7 @@ Bu proje, e-ticaret mağaza yorumlarını kullanarak metinlerin duygusal tonunu 
 ## 1. Proje Konusu ve Önemi 
 
 ### 1.1. Projenin Seçilme Gerekçesi ve İlgili Alanın Önemi
-Güncel e-ticaret platformlarında, kullanıcı yorumlarının hacmi geleneksel analiz yöntemlerini aşmıştır. Proje, bu büyük veri yığınını otomatik olarak sınıflandırarak **Müşteri Geri Bildirimlerinin Anlık Analizi** için kritik bir araç sunar. Bu, işletmelerin ürün kalitesini hızla değerlendirmesi ve marka itibarını koruması açısından hayati önem taşır.
+Güncel e-ticaret platformlarında, kullanıcı yorumlarının hacmi geleneksel analiz yöntemlerini aşmıştır. Proje, bu büyük veri yığınını otomatik olarak sınıflandırarak **Müşteri Geri Bildirimlerinin Anlık Analizi** için kritik bir araç sunar.
 
 ### 1.2. İlgili Alanda Yapılan Uygulamalara Karşılaştırmalı Bakış
 Duygu analizi, Makine Öğrenmesi (ML) ve Derin Öğrenme (DL) tekniklerinin kesişim noktasındadır.
@@ -47,31 +47,33 @@ BiLSTM, metin dizilerinde **bağlamı yakalama** konusunda Tek Yönlü LSTM ve g
 ### 4.1. Model Eğitimi Özeti
 * **Model Mimarisi:** BiLSTM (Gizli Katman Boyutu: 128)
 * **Optimizasyon:** Adam Optimizer
-*  Öğrenme Oranı: 0.001
+*  Öğrenme Oranı: 0.005
 * **Epoch Sayısı:** 12
-* **Eğitim Sonucu (Acc):** %90.65
+* **Eğitim Sonucu (Acc):** %95.04
+*  **İlk learning rate 0.001'e göre çok daha iyi bir sonuç sergilediği için nihai seçimler seçildi.
+* **Final Eğitim Kaybı (Loss)** | **0.135** |
 
 ### 4.2. Detaylı Model Değerlendirmesi (Test Verisi Üzerinden)
 
-Modelin nihai performansı, akademik çalışmalarda standart olan **F1 Skoru** ve **Karışıklık Matrisi** ile değerlendirilmiştir.
+Modelin gerçek dünya performansını simüle eden test seti üzerindeki değerlendirmesi sonucunda, **%89.75** oranında genel doğruluk elde edilmiştir. Sınıf bazlı metrikler aşağıda detaylandırılmıştır.
 
 #### [1] Detaylı Sınıflandırma Raporu (F1 Skoru)
-| Metrik | Olumsuz (0) | Olumlu (1) | Weighted Avg (Ağırlıklı Ortalama) |
+
+| Metrik | Olumsuz (0) | Olumlu (1) | Weighted Avg (Ağırlıklı Ort.) |
 | :--- | :--- | :--- | :--- |
-| **Precision** | 0.8664 | 0.9226 | 0.8952 |
-| **Recall** | 0.9239 | 0.8642 | 0.8933 |
-| **F1-Score** | **0.8942** | **0.8925** | **0.8933** |
-| **Doğruluk (Accuracy)** | | | **0.8933** |
+| **Precision (Kesinlik)** | 0.8884 | 0.9064 | 0.8976 |
+| **Recall (Duyarlılık)** | 0.9034 | 0.8918 | 0.8975 |
+| **F1-Score** | **0.8958** | **0.8991** | **0.8975** |
+| **Doğruluk (Accuracy)** | - | - | **0.8975** |
 
 #### [2] Karışıklık Matrisi ve Hata Analizi
-Matris çıktısı: `[[765 63], [118 751]]`
 
-| Değer | Tanım | Analiz |
-| :--- | :--- | :--- |
-| **FN (118)** | Yanlış Negatif (Gerçekte Olumlu, Tahmin: Olumsuz) | Modelin en sık yaptığı hata: Olumlu yorumları kaçırma. |
-| **FP (63)** | Yanlış Pozitif (Gerçekte Olumsuz, Tahmin: Olumlu) | Modelin yanlışlıkla iyimser olduğu durumlar (daha az). |
+Modelin test setindeki 1697 yorum üzerindeki tahmin dağılımı şu şekildedir:
 
----
+`Matris Çıktısı: [[748, 80], [94, 775]]`
+
+
+> **Sonuç Analizi:** Model, Yanlış Negatif (94) ve Yanlış Pozitif (80) hataları arasında oldukça **dengeli bir dağılım** sergiledi.. İki hata türü arasındaki farkın az olması, modelin belirli bir sınıfa karşı (bias) önyargılı olmadığını ve genelleme yeteneğinin yüksek olduğunu kanıtlar.
 
 ## 5. Proje Dokümantasyonu ve Kod Düzeni 
 
@@ -84,4 +86,75 @@ Projenin yapısı, sürdürülebilirlik ve yeniden üretilebilirlik ilkelerine u
 * `README.md`: Bu dokümantasyon, projenin tüm aşamalarını ve sonuçlarını açıklar.
 
 ---
+# EN Sentiment Analysis of Turkish Store Reviews with Deep Learning
+
+This project performs sentiment classification (Positive/Negative) on Turkish e-commerce product reviews using a **Bidirectional Long Short-Term Memory (BiLSTM)** deep learning model.
+
+---
+
+## 1. Project Topic and Importance
+
+### 1.1. Motivation  
+The rapid growth of customer reviews on online platforms exceeds the limits of manual analysis. Automated sentiment classification supports **real-time customer feedback monitoring**, which is crucial for decision-making in e-commerce systems.
+
+### 1.2. Comparison with Existing Approaches  
+- **Traditional ML (SVM, Naive Bayes):** Fast but fails to capture word order and context.  
+- **Deep Learning:** Learns sequential dependencies and achieves higher accuracy.
+
+---
+
+## 2. Dataset and Preprocessing
+
+### 2.1. Dataset  
+- **Source:** Kaggle – “Duygu Analizi İçin Ürün Yorumları”  
+- **Link:** https://www.kaggle.com/datasets/burhanbilenn/duygu-analizi-icin-urun-yorumlari/data  
+- **Size:** 8,484 Turkish product reviews  
+
+### 2.2. Preprocessing  
+- Binary label assignment (Positive / Negative)  
+- Removal of numbers, punctuation, and special characters  
+- Turkish stop-word removal  
+- Text vectorization into integer sequences  
+- **Vocabulary size:** 4,002  
+
+---
+
+## 3. Methodology
+
+### 3.1. Selected Method: Bidirectional LSTM (BiLSTM)  
+BiLSTM processes sequences in both forward and backward directions, allowing better understanding of contextual transitions.
+
+Example:  
+*“Ürün hızlıydı fakat kalitesi hayal kırıklığıydı.”*  
+The contrast introduced by *“fakat”* is captured more effectively by BiLSTM.
+
+---
+
+## 4. Model Training and Evaluation
+
+### 4.1. Training Summary  
+- **Model:** BiLSTM  
+- **Hidden Size:** 128  
+- **Optimizer:** Adam  
+- **Learning Rate:** 0.005  
+- **Epochs:** 12  
+- **Training Accuracy:** 95.04%  
+- **Final Loss:** 0.135  
+
+### 4.2. Test Results  
+
+#### Classification Report
+
+| Metric | Negative (0) | Positive (1) | Weighted Avg |
+|--------|--------------|--------------|--------------|
+| Precision | 0.8884 | 0.9064 | 0.8976 |
+| Recall | 0.9034 | 0.8918 | 0.8975 |
+| F1-Score | 0.8958 | 0.8991 | 0.8975 |
+| Accuracy | – | – | **0.8975** |
+
+#### Confusion Matrix  : 
+[[748, 80], [94, 775]]
+
+**Interpretation:**  
+False Positives (80) and False Negatives (94) are balanced, indicating that the model is not biased toward any class.
 
